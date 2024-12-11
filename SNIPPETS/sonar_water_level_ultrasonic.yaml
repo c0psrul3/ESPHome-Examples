@@ -1,0 +1,98 @@
+output:
+  - platform: gpio
+    pin: GPIO4
+    id: sonar_power
+
+status_led:
+  pin: GPIO2
+
+
+sensor:
+  - platform: ultrasonic
+    trigger_pin: GPIO14
+    echo_pin: GPIO12
+    name: "Ultrasonic sensor"
+    id: tanklevel_sonar_sensor
+    timeout: 4m 
+    pulse_time: 15us
+    update_interval: never
+    unit_of_measurement: "cm"
+    accuracy_decimals: 3
+    icon: "mdi:water-percent"
+    filters:
+    - multiply: 100
+    - sliding_window_moving_average:
+        window_size: 5
+        send_every: 5
+        send_first_at: 5
+    - filter_out: nan
+    - filter_out: 0.0
+  - platform: adc
+    pin: A0
+    name: "Battery sensor"
+    id: tanklevel_battery_sensor
+    update_interval: never
+    accuracy_decimals: 3
+    icon: "mdi:power"
+    filters:
+      - calibrate_polynomial:
+         degree: 3
+         datapoints:
+          # Map 0.0 (from sensor) to 0.0 (true value)
+          - 0.68945 -> 3.18
+          - 0.73047 -> 3.34
+          - 0.79785 -> 3.66
+          - 0.82715 -> 3.83
+          - 0.87402 -> 4.01
+          - 0.90332 -> 4.14
+          - 0.91797 -> 4.21
+  - platform: wifi_signal
+    id: tanklevel_wifi_signal
+    name: "Wifi Signal sensor"
+    icon: "mdi:wifi"
+    update_interval: never
+
+
+script:
+  - id: read_then_sleep
+    then:
+      - output.turn_on: sonar_power
+      - delay: 2s
+      - component.update: tanklevel_sonar_sensor
+      - delay: 1s
+      - component.update: tanklevel_sonar_sensor
+      - delay: 1s
+      - component.update: tanklevel_sonar_sensor
+      - delay: 1s
+      - component.update: tanklevel_sonar_sensor
+      - delay: 1s
+      - component.update: tanklevel_sonar_sensor
+      - component.update: tanklevel_battery_sensor
+      - component.update: tanklevel_wifi_signal
+      - delay: 4s
+      - script.execute: consider_deep_sleep
+
+  - id: consider_deep_sleep
+    then:
+      - if:
+          condition:
+            lambda: 'return id(tanklevel_battery_sensor).state > 3.4;'
+          then:
+            - logger.log:
+                format: "Battery state high"
+            - lambda: |-
+                id(enter_deep_sleep).set_sleep_duration(XXXXXX);
+          else:
+            - logger.log:
+                format: "Battery state low"
+            - lambda: |-
+                id(enter_deep_sleep).set_sleep_duration(YYYYYY);
+      - deep_sleep.enter:
+          id: enter_deep_sleep
+
+
+deep_sleep:
+  id: enter_deep_sleep
+  sleep_duration: 2min
+    
+

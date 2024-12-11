@@ -1,0 +1,17 @@
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    reset_pin: GPIO32
+    address: 0x3C
+    # Display output needs adjustments
+    lambda: |-
+      it.printf(0, 10, id(my_font), "Feuchtigkeit");
+      it.printf(0, 32, id(my_font), "liegt bei:");
+      it.printf(0, 54, id(my_font), "%.1f %%", id(moisture_sensor).state);
+    
+font:
+  - file: "arial.ttf"
+    id: my_font
+    size: 20
+

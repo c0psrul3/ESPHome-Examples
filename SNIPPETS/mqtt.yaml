@@ -1,0 +1,44 @@
+mqtt:
+  broker: 192.168.x.xxx
+  port: xxxx
+  username: xxxx
+  password: xxxx
+  birth_message:
+  will_message:
+  on_message:
+    - topic: /bedford/ota_mode
+      payload: 'ON'
+      then:
+        - deep_sleep.prevent: deep_sleep_1
+    - topic: bedford/sleep_mode
+      payload: 'ON'
+      then:
+        - deep_sleep.enter: deep_sleep_1
+
+sensor:
+  - platform: adc
+    pin: A0
+    name: "Soil Moisture"
+    update_interval: 600s
+    unit_of_measurement: "%"
+    filters:
+    - median:
+        window_size: 7
+        send_every: 4
+        send_first_at: 1
+    - calibrate_linear:
+        - 0.85 -> 0.00
+        - 0.44 -> 100.00
+    - lambda: |
+        if (x < 0) return 0; 
+        else if (x > 100) return 100;
+        else return (x);
+
+  - platform: mqtt
+    name: 'Soil Moisture'
+    state_topic: "garden-moisture-sensor/sensor/voltage/soil_moisture"
+    unit_of_measurement: '%'
+    device_class: 'wet'
+    qos: 2
+    payload_available: "online"
+    payload_not_available: "offline"
