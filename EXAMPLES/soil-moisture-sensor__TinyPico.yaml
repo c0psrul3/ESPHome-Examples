@@ -1,0 +1,275 @@
+esphome:
+  name: tinypico-plant-2
+  friendly_name: tinypico-plant-2
+
+esp32:
+  board: tinypico
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "FLMNfnt/LpQC0qMEyXQ1vFnow+K5RN7lpW26mMzLAds="
+
+ota:
+  - platform: esphome
+    password: "5ff24c1537d299179380a8428a44d351"
+
+wifi:
+  ssid: !secret wifi_iot_ssid
+  password: !secret wifi_iot_password
+  domain: ".lan"
+  fast_connect: true
+  ap:
+    ssid: "Tinypico-Plant-2"
+    password: "k0UZN3errZip"
+
+mdns:
+  disabled: false
+
+# captive_portal:
+
+web_server:
+  port: 80
+
+# globals:
+#   - id: minimumRawValue
+#     type: float
+#     restore_value: no
+#     initial_value: $minimum_raw_value
+#   - id: maximumRawValue
+#     type: float
+#     restore_value: no
+#     initial_value: $maximum_raw_value
+#   - id: temperatureOffset
+#     type: float
+#     restore_value: no
+#     initial_value: $temperature_offset
+
+# # Deep Sleep Feature. Needs adjustments...
+# deep_sleep:
+#   run_duration: 70s
+#   sleep_duration: 30min
+
+i2c:
+  # sda: GPIO21
+  # scl: GPIO22
+  # scan: false
+
+# output:
+#   - platform: gpio
+#     pin: GPIO13     # APA102  ## DATA - GPIO2   ## CLK - GPIO2  ## PWR - GPIO13
+#     id: rgb_output
+#     inverted: false
+
+light:
+  - platform: fastled_spi
+    chipset: APA102
+    data_pin: GPIO2
+    clock_pin: GPIO12
+    num_leds: 1
+    rgb_order: BRG
+    name: "RGB Light"
+    # restore_mode: ALWAYS_ON
+
+sensor:
+  - platform: wifi_signal
+    name: "Plant - WiFi Signal Sensor"
+    update_interval: 30s
+
+  # - platform: adc
+  #   pin: GPIO33
+  #   id: moisture_sensor
+  #   accuracy_decimals: 5
+  #   unit_of_measurement: '%'
+  #   icon: "mdi:water-percent"
+  #   name: "Plant - Moisture Level"
+  #   update_interval: 10s
+  #   # Sensor dry around 1.06900v, sensor wet around 0.07500v
+  #   filters:
+  #     - calibrate_linear:
+  #       - 1.06900 -> 0.0
+  #       - 0.07500 -> 100.0
+
+  - platform: adc
+    pin: GPIO33
+    id: "adcRaw_Sensor_Data"
+    accuracy_decimals: 5
+    name: "Plant - Sensor Voltage"
+    update_interval: 15s
+
+  # - platform: adc
+  #   pin: VCC
+  #   id: "VCC"
+  #   internal: true
+    
+  # - platform: template
+  #   name: "esp.2.battery_level"
+  #   unit_of_measurement: '%'
+  #   update_interval: 5s
+  #   lambda: |-
+  #     return ((id(VCC).state /4.0) * 100.00);
+
+  # Battery Charge
+  - platform: adc
+    pin: GPIO34
+    id: "chgbatt"
+    name: "Charge Voltage"
+    update_interval: 30s
+    device_class: "battery"
+    state_class: "measurement"
+    entity_category: "diagnostic"
+    icon: "mdi:battery-outline"
+    # accuracy_decimals: 1
+    attenuation: 12dB
+    samples: 10
+    # filters:
+    #   - multiply: 2.0  # The voltage divider requires us to multiply by 2
+  
+  # Battery Voltage
+  - platform: adc
+    pin: GPIO35
+    id: "vbatt"
+    name: "Battery Voltage"
+    update_interval: 15s
+    # disabled_by_default: false
+    device_class: "battery"
+    state_class: "measurement"
+    entity_category: "diagnostic"
+    icon: "mdi:battery-outline"
+    attenuation: 12dB
+    # raw: true
+    accuracy_decimals: 4
+    samples: 10 
+    filters:
+      - multiply: 3.750  # The voltage divider requires us to multiply
+    # lambda: |-
+      # return ((id(vbatt).state /4.0) * 100.00);
+    on_value:
+      then:
+        - component.update: pbatt
+
+  # derive battery percentage 3300mV=0%, 3950mV=100%
+  - platform: template
+  #   lambda: |-
+  #     float x = id(vbatt).state;
+  #     if (x < 3300) {
+  #       x = 3300;
+  #     }
+  #     if (x > 3950) {
+  #       x = 3950;
+  #     }
+  #     float y = (x - 3300) / 650 * 100;
+  #     return y;
+    name: "Battery Percentage"
+    id: "pbatt"
+    update_interval: never
+    unit_of_measurement: "%"
+    device_class: "battery"
+    state_class: "measurement"
+    icon: "mdi:battery"
+    accuracy_decimals: 0
+
+          
+# display:
+#   - platform: ssd1306_i2c
+#     model: "SSD1306 128x64"
+#     reset_pin: GPIO32
+#     address: 0x3C
+#     # Display output needs adjustments
+#     lambda: |-
+#       it.printf(0, 10, id(my_font), "Feuchtigkeit");
+#       it.printf(0, 32, id(my_font), "liegt bei:");
+#       it.printf(0, 54, id(my_font), "%.1f %%", id(moisture_sensor).state);
+      
+# font:
+#   - file: "arial.ttf"
+#     id: my_font
+#     size: 20
+
+
+
+
+### see also: [ april sensor ](https://github.com/illuzn/esphome-april-soil-moisture-sensor/blob/main/default-template.yaml)
+#
+#   - platform: adc
+#     pin: 9
+#     raw: true
+#     id: rMoisture
+#     name: "Raw Moisture reading"
+#     update_interval: never
+#     unit_of_measurement: raw
+#     disabled_by_default: true
+#     state_class: "measurement"
+#     icon: "mdi:water-alert"
+#     entity_category: "diagnostic"
+
+# #derive moisture level 3800=100% 6800=0%
+#   - platform: template
+#     name: "Moisture Level (Instant)"
+#     id: "iMoisture"
+#     unit_of_measurement: "%"
+#     update_interval: never
+#     state_class: "measurement"
+#     disabled_by_default: true
+#     icon: "mdi:water-percent"
+#     accuracy_decimals: 0
+#     lambda: |-
+#       float x = id(rMoisture).state;
+#       if (x < id(minimumRawValue)) {
+#         x = id(minimumRawValue);
+#       }
+#       if (x > id(maximumRawValue)) {
+#         x = id(maximumRawValue);
+#       }
+#       float z = id(maximumRawValue) - id(minimumRawValue);
+#       float y = 100-((x - id(minimumRawValue)) / z * 100);
+#       return y;
+
+#   - platform: tmp102
+#     id: "rTemperature"
+#     address: 0x48
+#     update_interval: $temperature_update_interval
+#     entity_category: diagnostic
+#     name: "Raw Temperature"
+#     disabled_by_default: true
+#     on_value:
+#       then:
+#         - component.update: aTemperature
+
+#   - platform: template
+#     name: "Temperature"
+#     id: "aTemperature"
+#     unit_of_measurement: "°C"
+#     update_interval: never
+#     state_class: "Measurement"
+#     icon: "mdi:water-percent"
+#     accuracy_decimals: 1
+#     lambda: |-
+#       return id(rTemperature).state + id(temperatureOffset);
+
+# output:
+#   - platform: ledc
+#     pin: 17
+#     frequency: 1500000Hz
+#     id: moisture_gen
+
+# interval:
+#   - interval: $moisture_update_interval
+
+#     then:
+#       - output.turn_on: moisture_gen
+#       - output.set_level:
+#           id: moisture_gen
+#           level: 34%
+#       - delay: 500ms
+#       - component.update: rMoisture
+#       - component.update: iMoisture
+#       - component.update: aMoisture
+#       - output.turn_off: moisture_gen
+      
+
