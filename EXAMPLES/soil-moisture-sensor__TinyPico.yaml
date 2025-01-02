@@ -13,23 +13,40 @@ logger:
 # Enable Home Assistant API
 api:
   encryption:
-    key: "FLMNfnt/LpQC0qMEyXQ1vFnow+K5RN7lpW26mMzLAds="
+    key: !secret hass_api_key
 
 ota:
   - platform: esphome
-    password: "5ff24c1537d299179380a8428a44d351"
+    password: !secret esphome_ota_password
 
 wifi:
-  ssid: !secret wifi_iot_ssid
-  password: !secret wifi_iot_password
-  domain: ".lan"
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  domain: !secret domain
   fast_connect: true
   ap:
     ssid: "Tinypico-Plant-2"
-    password: "k0UZN3errZip"
+    password: !secret wifi_password
 
 mdns:
   disabled: false
+
+mqtt:
+  broker: 192.168.x.xxx
+  port: xxxx
+  username: xxxx
+  password: xxxx
+  birth_message:
+  will_message:
+  on_message:
+    - topic: /bedford/ota_mode
+      payload: 'ON'
+      then:
+        - deep_sleep.prevent: deep_sleep_1
+    - topic: bedford/sleep_mode
+      payload: 'ON'
+      then:
+        - deep_sleep.enter: deep_sleep_1
 
 # captive_portal:
 
@@ -52,7 +69,7 @@ web_server:
 
 # # Deep Sleep Feature. Needs adjustments...
 # deep_sleep:
-#   run_duration: 70s
+#   run_duration: 300s
 #   sleep_duration: 30min
 
 i2c:
