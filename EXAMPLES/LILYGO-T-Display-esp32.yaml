@@ -1,0 +1,123 @@
+# ----
+# [ESPHome EXAMPLE - TTGO T-Display](https://github.com/anton-semeniak/Esphome-TTGO-T-Display-Remote)
+#
+# ----
+# [PlatformIO - Lilygo T-Display ESP32](https://docs.platformio.org/en/stable/boards/espressif32/lilygo-t-display.html)
+#   ```yaml
+#   [env:lilygo-t-display]
+#   platform = espressif32
+#   board = lilygo-t-display
+#   ```
+
+
+esphome:
+  name: ttgo-tdisplay
+  friendly_name: ttgo-tdisplay
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret ttgo_tdisplay_api_key
+
+ota:
+  - platform: esphome
+    password: !secret esphome_ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  domain: !secret domain
+  fast_connect: true
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "ttgo-tdisplay"
+    password: !secret wifi_password
+
+# captive_portal:
+
+mdns:
+  disabled: false
+
+# # MQTT setup
+# mqtt:
+#   broker: ${broker_ip}
+#   username: has
+#   password: !secret mqtt_pw
+#   topic_prefix: !secret air_quality_prefix
+#   log_topic: !secret air_quality_log
+
+web_server:
+  port: 80
+
+# # Deep Sleep Feature. Needs adjustments...
+# deep_sleep:
+#   run_duration: 180s
+#   sleep_duration: 30min
+
+# globals:
+#   - id: minimumRawValue
+#     type: float
+#     restore_value: no
+#     initial_value: $minimum_raw_value
+#   - id: maximumRawValue
+#     type: float
+#     restore_value: no
+#     initial_value: $maximum_raw_value
+#   - id: temperatureOffset
+#     type: float
+#     restore_value: no
+#     initial_value: $temperature_offset
+
+substitutions:
+  sensorname: sensor-presence
+  entitysub: BME680
+  domain: !secret domain
+
+# interval:
+#   - interval: $moisture_update_interval
+
+#     then:
+#       - output.turn_on: moisture_gen
+#       - output.set_level:
+#           id: moisture_gen
+#           level: 34%
+#       - delay: 500ms
+#       - component.update: rMoisture
+#       - component.update: iMoisture
+#       - component.update: aMoisture
+#       - output.turn_off: moisture_gen
+
+
+
+
+
+
+
+spi:
+  clk_pin: GPIO18
+  mosi_pin: GPIO19
+
+image:
+  - file: "ha_esphome.png"
+    id: my_image
+    type: RGB565
+
+display:
+  - platform: st7789v
+    id: st7789vdisplay
+    reset_pin: GPIO23
+    dc_pin: GPIO16
+    cs_pin: GPIO5
+    bl_pin: GPIO4
+    update_interval: 50ms
+    lambda: |-
+      // Draw the image my_image at position [x=0,y=0]
+      it.image(0, 0, id(my_image));

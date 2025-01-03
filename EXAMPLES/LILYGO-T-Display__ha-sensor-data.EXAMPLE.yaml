@@ -1,0 +1,87 @@
+
+        
+
+sensor:
+  - platform: homeassistant
+    id: val_1
+    entity_id: counter.acqua_piccolo
+
+  - platform: homeassistant
+    id: val_2
+    entity_id: counter.acqua_grande
+
+  - platform: homeassistant
+    id: val_3
+    entity_id: sensor.somma_litri_no_decimali
+ 
+  - platform: homeassistant
+    id: val_4
+    entity_id: sensor.temp_esterna_temperature
+
+  
+font:
+  - file: "fonts/Roboto-Medium.ttf"
+    id: tnr1
+    size: 20
+
+  - file: "fonts/Helvetica.ttf"
+    id: tnr2
+    size: 24
+
+  - file: "fonts/slant.ttf"
+    id: tnr3
+    size: 31
+
+color:
+  - id: RED
+    red: 100%
+    green: 0%
+    blue: 0%
+
+  - id: BLUE
+    red: 0%
+    green: 0%
+    blue: 100%
+
+  - id: WHITE
+    red: 100%
+    green: 100%
+    blue: 100%
+
+  - id: GREEN
+    red: 0%
+    green: 100%
+    blue: 0%
+
+  - id: GRIGIO
+    red: 50%
+    green: 50%
+    blue: 50%
+
+  - id: YELLOW
+    red: 100%
+    green: 100%
+    blue: 0%
+    
+
+display:
+  - platform: st7789v
+    model: TTGO TDisplay 135x240
+    backlight_pin: GPIO4
+    cs_pin: GPIO5
+    dc_pin: GPIO16
+    reset_pin: GPIO23
+    rotation: 90°
+    #brightness: 0.5
+    update_interval: 5s
+    lambda: |-
+      it.print(9, 6, id(tnr3), GREEN, "FdXx Dispenser");
+      it.print(4,  45, id(tnr1), GRIGIO, TextAlign::LEFT, "Piccolo:");  
+      it.print(4,  75, id(tnr1), GRIGIO, TextAlign::LEFT, "Grande:");
+      it.print(40,  105, id(tnr2), RED, TextAlign::LEFT, "Litri Totali Erogati");
+      it.print(175,  45, id(tnr1), GRIGIO, TextAlign::LEFT, "Temp:");
+      it.printf(80, 45, id(tnr1), BLUE, "%.0f", id(val_1).state);
+      it.printf(80, 75, id(tnr1), BLUE, "%.0f", id(val_2).state);
+      it.printf(4, 105, id(tnr2), RED, "%.0f", id(val_3).state);
+      it.printf(180, 75, id(tnr1), YELLOW, "%.0f°C", id(val_4).state);
+     
