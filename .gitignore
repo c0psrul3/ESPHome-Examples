@@ -1,3 +1,5 @@
 *.tmp
 *.bak
 *.BAK-*
+
+esphome/secrets.yaml
