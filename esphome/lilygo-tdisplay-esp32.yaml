@@ -1,0 +1,315 @@
+# [ESPHome EXAMPLE - TTGO T-Display](https://github.com/anton-semeniak/Esphome-TTGO-T-Display-Remote)
+esphome:
+  name: ttgo-tdisplay
+  friendly_name: $boardname
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  id: api1
+  encryption:
+    key: !secret ttgo_tdisplay_api_key
+
+ota:
+  - platform: esphome
+    password: !secret esphome_ota_password
+
+wifi:
+  id: WiFi1
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  domain: !secret domain
+  fast_connect: true
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "ttgo-tdisplay"
+    password: !secret wifi_password
+
+# captive_portal:
+
+mdns:
+  disabled: false
+
+# # MQTT setup
+# mqtt:
+#   broker: ${broker_ip}
+#   username: has
+#   password: !secret mqtt_pw
+#   topic_prefix: !secret air_quality_prefix
+#   log_topic: !secret air_quality_log
+
+web_server:
+  port: 80
+
+# # Deep Sleep Feature. Needs adjustments...
+# deep_sleep:
+#   run_duration: 180s
+#   sleep_duration: 30min
+
+remote_receiver:
+  pin: 
+    number: GPIO27
+    inverted: True
+  dump: nec
+
+globals:
+  - id: last_remote
+    restore_value: no
+    type: int
+    initial_value: "0"
+  - id: menu_pos
+    restore_value: no
+    type: int
+    initial_value: "0"
+
+substitutions:
+  boardname: ttgo-tdisplay
+  entitysub: BME680
+  domain: !secret domain
+
+# interval:
+#   - interval: $moisture_update_interval
+#     then:
+#       - output.turn_on: moisture_gen
+#       - output.set_level:
+#           id: moisture_gen
+#           level: 34%
+#       - delay: 500ms
+#       - component.update: rMoisture
+#       - component.update: iMoisture
+#       - component.update: aMoisture
+#       - output.turn_off: moisture_gen
+
+spi:
+  clk_pin: GPIO18
+  mosi_pin: GPIO19
+
+font:
+  - file: "gfonts://Roboto"
+    id: roboto_lg
+    size: 20
+  - file: "gfonts://Roboto"
+    id: roboto_sm
+    size: 16
+  - file: fonts/slkscr.ttf
+    id: font_slkscr
+    size: 24
+
+image:
+  - file: "images/LAMP_ON.png"
+    id: lamp_on
+    type: RGB565
+  - file: "images/LAMP_OFF.png"
+    id: lamp_off
+    type: RGB565
+  - file: "images/wifi_24x24.png"
+    id: wifi_img
+    type: RGB565
+  - file: "images/ha_logo.png"
+    id: ha_logo
+    type: RGB565
+  - file: "images/ha_esp.png"
+    id: ha_esp
+    type: RGB565
+  - file: "images/esphome_icon.png"
+    id: esphome_logo
+    type: RGB565
+
+color:
+  - id: RED
+    red: 100%
+    green: 0%
+    blue: 0%
+  - id: BLUE
+    red: 0%
+    green: 0%
+    blue: 100%
+  - id: WHITE
+    red: 100%
+    green: 100%
+    blue: 100%
+  - id: GREEN
+    red: 0%
+    green: 100%
+    blue: 0%
+  - id: GRAY
+    red: 50%
+    green: 50%
+    blue: 50%
+  - id: YELLOW
+    red: 100%
+    green: 100%
+    blue: 0%
+    
+
+# Allow dimmable control of the backlight (pin GPIO4)
+output:
+  - platform: ledc
+    pin:
+      number: GPIO4
+      allow_other_uses: true
+    id: disp_backlight
+
+light:
+  - platform: monochromatic
+    output: disp_backlight
+    name: "Backlight"
+
+time:
+  - platform: homeassistant
+    id: esptime
+
+sensor:
+  - platform: homeassistant
+    id: shellyht_humidity
+    entity_id: sensor.shellyplusht_b8d61a8b2864_humidity
+
+  - platform: homeassistant
+    id: shellyht_temp
+    entity_id: sensor.shellyplusht_b8d61a8b2864_temperature
+
+  - platform: homeassistant
+    id: micron_temp
+    entity_id: sensor.micron_sensor_temperature_measurement
+ 
+  - platform: homeassistant
+    id: micron_humidity
+    entity_id: sensor.micron_sensor_relative_humidity_measurement
+
+#   - platform: adc
+#     pin: 7
+#     attenuation: 12dB
+#     raw: true
+#     id: "vbatt"
+#     name: "Battery Voltage"
+#     update_interval: $battery_update_interval
+#     disabled_by_default: true
+#     device_class: "voltage"
+#     state_class: "measurement"
+#     icon: "mdi:battery-outline"
+#     accuracy_decimals: 2
+#     entity_category: "diagnostic"
+#     on_value:
+#       then:
+#         - component.update: pbatt
+#
+#   # derive battery percentage 3300mV=0%, 3950mV=100%
+#   - platform: template
+#     lambda: |-
+#       float x = id(vbatt).state;
+#       if (x < 3300) {
+#         x = 3300;
+#       }
+#       if (x > 3950) {
+#         x = 3950;
+#       }
+#       float y = (x - 3300) / 650 * 100;
+#       return y;
+#     name: "Battery Percentage"
+#     id: "pbatt"
+#     update_interval: never
+#     unit_of_measurement: "%"
+#     device_class: "battery"
+#     state_class: "measurement"
+#     icon: "mdi:battery"
+#     accuracy_decimals: 0
+
+binary_sensor:
+  - platform: status
+    name: "Node Status"
+    id: system_status
+
+  # T-Display Buttons
+  - platform: gpio
+    pin:
+      number: GPIO0
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    name: "T-Display Button Input 0"
+    id: tdisplay_button_input_0
+  - platform: gpio
+    pin:
+      number: GPIO35
+      inverted: true
+    name: "T-Display Button Input 1"
+    id: tdisplay_button_input_1
+
+  # HOME ASSISTANT LIGHTS/SWITHES
+  - platform: homeassistant
+    id: library_floor_lamp_plugin
+    entity_id: light.library_floor_lamp_plugin
+    internal: true
+    on_state:
+      then:
+        - component.update: st7789vdisplay
+  - platform: homeassistant
+    id: meter_plus_0c18
+    entity_id: sensor.meter_plus_0c18
+    internal: True
+    on_state:
+      then:
+        - component.update: st7789vdisplay
+  - platform: homeassistant
+    id: kitchen_main_lights
+    entity_id: light.kitchen_main_lights
+    internal: true
+    on_state:
+      then:
+        - component.update: st7789vdisplay
+
+display:
+  - platform: st7789v
+    id: st7789vdisplay
+    model: TTGO TDisplay 135x240
+    reset_pin: GPIO23
+    dc_pin: GPIO16
+    cs_pin: GPIO5
+    rotation: 90°
+    backlight_pin:
+      number: GPIO4
+      allow_other_uses: true
+    update_interval: 5s
+    lambda: |-
+      it.print(4,  9, id(roboto_lg), GRAY, TextAlign::LEFT, "Shelly HT+:");
+      it.print(4, 45, id(roboto_lg), GRAY, TextAlign::LEFT, "Micron:");
+      it.printf(120, 9, id(roboto_lg), BLUE, "%s °C", id(shellyht_temp).raw_state);
+      it.printf(180, 9, id(roboto_lg), BLUE, "%.0f%%", id(shellyht_humidity).raw_state);
+      it.printf(120, 45, id(roboto_lg), RED, "%.0f°C", id(micron_temp).raw_state);
+      it.printf(180, 45, id(roboto_lg), YELLOW, "%.0f%%", id(micron_humidity).raw_state);
+
+# if (id(library_floor_lamp_plugin).state){
+#   it.image(0, 0, id(lamp_on));
+# }
+# else {
+#   it.image(0, 0, id(lamp_off));
+# }
+# if (id(kitchen_main_lights).state){
+#   it.image(0, 33, id(lamp_on));
+# }
+# else {
+#   it.image(0, 33, id(lamp_off));
+# }
+
+# // Spacer
+# it.filled_rectangle (5,205,125,3,0xFFFF);
+
+# // Time
+# it.strftime(3, 235, id(font_slkscr), 0xFFFF, TextAlign::BASELINE_LEFT, "%H:%M", id(esptime).now());
+# //it.printf (120, 215, id(font_slkscr), 0xFE60,"%i",id(last_remote));
+
+# // Status Icons
+# if (id(WiFi1).is_connected ()) {
+#   it.image(80, 216, id(wifi_img));
+# }
+# if (id(api1).is_connected ()) {
+#   it.image(110, 216, id(ha_logo));
+# }

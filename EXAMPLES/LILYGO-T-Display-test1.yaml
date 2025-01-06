@@ -120,23 +120,23 @@ image:
     type: RGB565
 
 color:
-  - id: my_red
+  - id: RED
     red: 100%
     green: 0%
     blue: 0%
-  - id: my_yellow
+  - id: YELLOW
     red: 100%
     green: 100%
     blue: 0%
-  - id: my_green
+  - id: GREEN
     red: 0%
     green: 100%
     blue: 0%
-  - id: my_blue
+  - id: BLUE
     red: 0%
     green: 0%
     blue: 100%
-  - id: my_gray
+  - id: GRAY
     red: 50%
     green: 50%
     blue: 50%
@@ -197,9 +197,8 @@ display:
       else {
         it.image(0, 33, id(lamp_off));
       }
-      it.image(0, 165, id(lamp_off));
       // Selected Item
-      it.rectangle(33, 33*id(menu_pos)+1, 102, 26, 0xFE60);
+      it.rectangle(33, 33, id(menu_pos)+1, 102, 26, GRAY);
       // Spacer
       it.filled_rectangle (5,205,125,3,0xFFFF);
       // Time
