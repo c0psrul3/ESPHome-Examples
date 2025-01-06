@@ -102,6 +102,7 @@
 #### References:
 * [nuttytree/ESPHome-Devices](https://github.com/nuttytree/ESPHome-Devices)
 * [Presence and Air Quality - example](https://github.com/withanhdammit/ESPHome-Presence/blob/main/README.md)
+* [VDBX - ESPHome Examples](https://wiki.vdbx.io/wild-ideas/esphome-configs)
 
 [detailed-tinypico]: https://s3.amazonaws.com/images.ecwid.com/images/wysiwyg/product/90477757/577111313/1692399779744304132957/main_features_tinypico_jpg "TinyPico detailed"
 [pinout-tinypico]: ./pinouts/TinyPico.jpg "TinyPico"
