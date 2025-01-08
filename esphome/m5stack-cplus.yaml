@@ -7,7 +7,8 @@
 #
 substitutions:
   lightEntity: lifx_nightvision_6d46f2_4
-  lightEntity1: library_floor_lamp_plugin
+  lightEntity1: lifx_color_66f3f4_4
+  # LightEntity1: library_floor_lamp_plugin
   # lightEntity1: lifx_color_66f3f4_4
   log_level: "INFO"
   friendly_name: "homething-basic"
@@ -71,13 +72,23 @@ spi:
   mosi_pin: GPIO15
 
 light:
-  - platform: neopixelbus
-    type: GRB
-    variant: WS2811
-    pin: GPIO0
-    num_leds: 10
+  # - platform: neopixelbus
+  #   type: GRB
+  #   variant: WS2811
+  #   pin: GPIO26
+  #   num_leds: 10
+  #   id: rgb_matrix
+  #   # internal: false
+
+  - platform: fastled_clockless
     id: rgb_matrix
-    internal: false
+    chipset: WS2811
+    pin: GPIO26
+    num_leds: 1
+    rgb_order: GRB
+    name: "RGB Light"
+    restore_mode: ALWAYS_ON
+
 
 time:
   - platform: homeassistant
