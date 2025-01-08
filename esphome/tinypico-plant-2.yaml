@@ -320,22 +320,22 @@ text_sensor:
         return {"error"};
       }
 
-  - platform: template
-    name: "IAQ Value"
-    disabled_by_default: True
-    lambda: |-
-      return int(id(iaq).state);
-    on_value:
-      then:
-        # - lambda: |-
-        #     ESP_LOGD("main", "IAQ value is %s", x);    
-        - light.addressable_set:
-            id: tinypico_led
-            range_from: 0
-            range_to: 50
-            red: 0%
-            green: 100%
-            blue: 0%
+  # - platform: template
+  #   name: "IAQ Value"
+  #   disabled_by_default: True
+  #   lambda: |-
+  #     return int(id(iaq).state);
+  #   on_value:
+  #     then:
+  #       - light.addressable_set:
+  #           id: tinypico_led
+  #           range_from: 0
+  #           range_to: 50
+  #           red: 0%
+  #           green: 100%
+  #           blue: 0%
+  #       # - lambda: |-
+  #       #     ESP_LOGD("main", "IAQ value is %s", x);    
   #   #   if ( int(id(iaq).state) <= 50) {
   #   #     return {"Excellent"};
   #   #   }
