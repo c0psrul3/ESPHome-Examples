@@ -2,4 +2,11 @@
 *.bak
 *.BAK-*
 
+# vendor/*
+
+vendor/alexphredorg__lilygo-weather-esphome
+vendor/Esphome-TTGO-T-Display-Weather
+vendor/PMaxx-Gaming__ttgo-display
+vendor/withanhdammit__ESPHome-Presence
+
 esphome/secrets.yaml

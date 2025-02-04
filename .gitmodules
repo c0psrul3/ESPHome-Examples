@@ -1,0 +1,12 @@
+[submodule "vendor/homeThing"]
+	path = homeThing
+	url = https://github.com/mike2194/homeThing.git
+[submodule "vendor/ld2410-configurator.albertnis"]
+	path = vendor/ld2410-configurator.albertnis
+	url = https://github.com/albertnis/ld2410-configurator
+[submodule "vendor/LD2450-ESPHome-Radar.TillFleisch"]
+	path = vendor/LD2450-ESPHome-Radar.TillFleisch
+	url = https://github.com/TillFleisch/ESPHome-HLK-LD2450
+[submodule "vendor/ESP32_LD2450.53l3cu5"]
+	path = vendor/ESP32_LD2450.53l3cu5
+	url = https://github.com/53l3cu5/ESP32_LD2450

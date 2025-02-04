@@ -1,0 +1,20 @@
+sensor:
+  - platform: shtcx
+    id: "shtc3_sensor"
+    i2c_id: bus_a
+    temperature:
+      name: Temperature
+      id: temperature_sensor
+      filters:
+        - offset: ${temperature_offset}
+        - lambda: "return x + id(temperature_offset_ui).state;"
+    humidity:
+      name: Humidity
+      id: humidity_sensor
+      filters:
+        - offset: ${humidity_offset}
+        - lambda: "return x + id(humidity_offset_ui).state;"
+    address: 0x70    # HTU21 - 0x40
+    update_interval: ${temperature_update_interval}
+    
+

@@ -1,0 +1,11 @@
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: 33
+      mode: INPUT_PULLDOWN
+    name: PIR
+    id: pir_motion_sensor
+    device_class: motion
+    filters:
+      - delayed_off:  !lambda 'return id(pir_off_latency).state * 1000.0;'
+

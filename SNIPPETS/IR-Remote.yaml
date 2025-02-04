@@ -1,0 +1,153 @@
+#
+# [IR Tx](https://esphome.io/components/remote_transmitter.html)
+# [IR Rx]()
+# -------
+#
+# Example configuration entry
+remote_transmitter:
+  pin: GPIOXX
+  carrier_duty_percent: 50%
+
+  # Example automation
+  on_transmit:
+    then:
+      - switch.turn_on: tx_enable
+  on_complete:
+    then:
+      - switch.turn_off: tx_enable
+
+  on_...:
+    - remote_transmitter.transmit_aeha:
+        address: 0x1FEF
+        data: [0x1F, 0x3E, 0x06, 0x5F]
+
+  on_...:
+    - remote_transmitter.transmit_abbwelcome:
+        source_address: 0x1001 # your indoor station address
+        destination_address: 0x4001 # door address
+        three_byte_address: false # address length of your system
+        message_type: 0x0d # unlock door, on some systems 0x0e is used instead
+        data: [0xab, 0xcd, 0xef]  # message data, see receiver dump
+
+
+
+
+# 
+# # Dysonremote: https://sourceforge.net/p/lirc-remotes/code/ci/master/tree/remotes/dyson/922662-06.jpeg?format=raw
+# # [lirc-remotes](https://sourceforge.net/p/lirc-remotes/code/ci/master/tree/remotes/dyson/)
+#
+# # Please make this file available to others
+# # by sending it to <lirc@bartelmus.de>
+# #
+# # this config file was automatically generated
+# # using lirc-0.9.0-pre1(default) on Wed May  3 16:16:52 2017
+# #
+# # contributed by Matt from http://www.pukit.com
+# #
+# # brand:                       Dyson
+# # model no. of remote control: 922662-06
+# # devices being controlled by this remote:
+# # Dyson AM04/AM05 Fans
+# 
+# begin remote
+# 
+#   name  dyson
+#   bits            8
+#   flags SPACE_ENC|CONST_LENGTH
+#   eps            30
+#   aeps          100
+# 
+#   header       2256   794
+#   one           789  1545
+#   zero          789   773
+#   ptrail        789
+#   pre_data_bits   7
+#   pre_data       0x48
+#   gap          131352
+#   toggle_bit_mask 0x2
+# 
+#       begin codes
+#           KEY_POWER                0x01
+#           KEY_DIRECTION            0xA9
+#           KEY_UP                   0x55
+#           KEY_DOWN                 0xFD
+#           KEY_RED                  0x79
+#           KEY_BLUE                 0xCC
+#       end codes
+# 
+# end remote
+# 
+
+
+
+
+#
+# # remote brand: Dyson
+# # remote model: ????
+# # remote control: hot+cool fan
+# 
+# begin remote
+# 
+#     name  /home/pi/DYSONFAN.conf
+#     flags RAW_CODES
+#     eps            30
+#     aeps          100
+# 
+#     gap          60468
+# 
+#         begin raw_codes
+# 
+#             name KEY_POWER
+#                2214     832     760    1585     757     820
+#                 759     813     759    1584     750     801
+#                 758     799     759     791     759     854
+#                 757     825     756     832     749     814
+#                 755     808     762     807     753     800
+#                 759    1558     777
+# 
+#             name KEY_X
+#                2269     773     815    1546     802     763
+#                 816     756     814    1516     818     746
+#                 813     744     815     749     800    1564
+#                 810     772     810    1532     814     758
+#                 820    1521     808     745     818    1504
+#                 819     733     816
+# 
+#             name KEY_VOLUMEUP
+#                2269     785     799    1536     817     761
+#                 809     761     817    1516     809     752
+#                 829     728     809     743     817     790
+#                 823    1527     816    1527     816    1529
+#                 802    1521     815     746     813     744
+#                 815     737     812
+#     name KEY_VOLUMEDOWN
+#                2281     769     812    1543     798     769
+#                 813     762     809    1520     813     748
+#                 810     745     828     727     809    1565
+#                 809    1538     817     757     813     761
+#                 829    1503     810    1518     816     740
+#                 816    1502     814
+# 
+#     name KEY_CHANNELUP
+#                2266     778     813    1534     810     764
+#                 815     758     811    1533     801     749
+#                 810     747     816     738     818     790
+#                 811    1536     820     757     812    1522
+#                 822     748     810    1521     814    1518
+#                 804     731     818
+# 
+#     name KEY_CHANNELDOWN
+#                2288     763     808    1538     817     760
+#                 809     762     819    1513     809     755
+#                 814     743     818     732     818    1558
+#                 817    1529     812    1545     802    1521
+#                 811    1521     813    1512     812     747
+#                 822     729     819
+# 
+#         end raw_codes
+# 
+# end remote
+# 
+
+
+

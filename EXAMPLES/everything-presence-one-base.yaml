@@ -1,0 +1,201 @@
+#
+# https://github.com/EverythingSmartHome/everything-presence-one/blob/main/everything-presence-one-ble.yaml
+#
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: true
+  project:
+    name: ${project_name}
+    version: ${project_version} 
+  on_boot:
+    priority: -100
+    then:
+      - switch.turn_on: mmwave_sensor
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+  level: ${log_level}
+
+api:
+
+ota:
+  - platform: esphome
+    id: ota_esphome
+  - platform: http_request
+    id: ota_http_request
+
+http_request:
+
+wifi:
+  fast_connect: ${hidden_ssid}
+  on_connect:
+    - switch.turn_on: mmwave_sensor
+
+improv_serial:
+
+i2c:
+  - id: bus_a
+    sda: 26
+    scl: 25
+    scan: true
+
+esp32_ble_tracker:
+  scan_parameters:
+    active: true
+
+bluetooth_proxy:
+  active: true
+
+esp32_improv:
+  authorizer: none
+
+light:
+  - platform: status_led
+    name: ESP32 status LED
+    pin: GPIO32
+    entity_category: config
+    disabled_by_default: False
+
+sensor:
+  - platform: shtcx
+    id: "shtc3_sensor"
+    i2c_id: bus_a
+    temperature:
+      name: Temperature
+      id: temperature_sensor
+      filters:
+        - offset: ${temperature_offset}
+        - lambda: "return x + id(temperature_offset_ui).state;"
+    humidity:
+      name: Humidity
+      id: humidity_sensor
+      filters:
+        - offset: ${humidity_offset}
+        - lambda: "return x + id(humidity_offset_ui).state;"
+    address: 0x70
+    update_interval: ${temperature_update_interval}
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: 33
+      mode: INPUT_PULLDOWN
+    name: PIR
+    id: pir_motion_sensor
+    device_class: motion
+    filters:
+      - delayed_off:  !lambda 'return id(pir_off_latency).state * 1000.0;'
+  - platform: template
+    name: Occupancy
+    id: occupancy
+    device_class: occupancy
+    filters:
+      - delayed_off: !lambda 'return id(occupancy_off_latency).state * 1000.0;'
+    on_state:
+      - lambda: 'id(illuminance_sensor).update();'
+    lambda: |-
+      if ( id(mmwave).state or id(pir_motion_sensor).state) {
+        return true;
+      } 
+      else if (id(mmwave).state == 0 and id(pir_motion_sensor).state == 0) {
+        return false;
+      } 
+      else {
+        return id(occupancy).state;
+      }
+
+number:
+  - platform: template
+    name: Occupancy off latency
+    icon: mdi:clock-end
+    entity_category: config
+    id: occupancy_off_latency
+    min_value: 1
+    max_value: 600
+    initial_value: 15
+    optimistic: true
+    step: 5
+    restore_value: true
+    unit_of_measurement: seconds
+    mode: slider
+
+  - platform: template
+    name: PIR off latency
+    icon: mdi:clock-end
+    entity_category: config
+    id: pir_off_latency
+    min_value: 1
+    max_value: 120
+    initial_value: 10
+    optimistic: true
+    step: 1
+    restore_value: true
+    unit_of_measurement: seconds
+    mode: slider
+
+  - platform: template
+    name: "Temperature Offset"
+    id: temperature_offset_ui
+    unit_of_measurement: "°C"
+    min_value: -20
+    max_value: 20
+    step: 0.1
+    mode: box
+    update_interval: never
+    optimistic: true
+    restore_value: true
+    initial_value: 0
+    icon: "mdi:thermometer"
+    entity_category: config
+    on_value:
+      - lambda: 'id(shtc3_sensor).update();'
+  - platform: template
+    name: "Humidity Offset"
+    id: humidity_offset_ui
+    unit_of_measurement: "%"
+    min_value: -50
+    max_value: 50
+    step: 0.1
+    mode: box
+    update_interval: never
+    optimistic: true
+    restore_value: true
+    initial_value: 0
+    icon: "mdi:water-percent"
+    entity_category: config
+    on_value:
+      - lambda: 'id(shtc3_sensor).update();'
+  - platform: template
+    name: "Illuminance Offset"
+    id: illuminance_offset_ui
+    unit_of_measurement: "lx"
+    min_value: -50
+    max_value: 50
+    step: 1
+    mode: box
+    update_interval: never
+    optimistic: true
+    restore_value: true
+    initial_value: 0
+    icon: "mdi:brightness-5"
+    entity_category: config
+    on_value:
+      - lambda: 'id(illuminance_sensor).update();'
+
+button:
+  - platform: restart
+    id: restart_internal
+    entity_category: config
+    internal: true
+  - platform: safe_mode
+    internal: false
+    name: Safe mode
+    entity_category: config
+    disabled_by_default: True
